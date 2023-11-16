@@ -1,5 +1,5 @@
 # Database directory
-db/
+db/stpaul_crime.sqlite3
 
 # Logs
 logs
