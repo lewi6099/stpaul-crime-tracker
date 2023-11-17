@@ -72,9 +72,96 @@ app.get('/neighborhoods', (req, res) => {
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = req.query;
+    let sql = 'SELECT * FROM Incidents';
+    let params = [];
+
+    // Query option: start_date
+    if(query.hasOwnProperty("start_date")){
+        let start_date = query.start_date;
+        if(params.length == 0){
+            sql += " WHERE date_time > ?";
+        } else{
+            sql += " AND date_time > ?";
+        }
+        params.push(start_date);
+    }
+    // Query option: end_date
+    if(query.hasOwnProperty("end_date")){
+        let end_date = query.end_date;
+        if(params.length == 0){
+            sql += " WHERE date_time < ?";
+        } else{
+            sql += " AND date_time < ?";
+        }
+        params.push(end_date);
+    }
+    // Query option: code
+    if(query.hasOwnProperty("code")){
+        let codes = query.code;
+        let codeArray = codes.split(',').map(String); // Turns codes into an array
+        let questionString = '(' + codeArray.map(() => '?').join(', ') + ')'; // Creates a string with ? to be inserted in the sql query
+        if(params.length == 0){
+            sql += " WHERE code IN " + questionString;
+        } else{
+            sql += " AND code IN " + questionString;
+        }
+        codeArray.forEach((element) => {
+            params.push(element);
+        });
+    }
+    // Query option: grid
+    if(query.hasOwnProperty("grid")){
+        let grids = query.grid;
+        let gridArray = grids.split(',').map(String); // Turns grids into an array
+        let questionString = '(' + gridArray.map(() => '?').join(', ') + ')'; // Creates a string with ? to be inserted in the sql query
+        if(params.length == 0){
+            sql += " WHERE police_grid IN " + questionString;
+        } else{
+            sql += " AND police_grid IN " + questionString;
+        }
+        gridArray.forEach((element) => {
+            params.push(element);
+        });
+    }
+    // Query option: neighborhood
+    if(query.hasOwnProperty("neighborhood")){
+        let neighborhoods = query.neighborhood;
+        let neighborhoodArray = neighborhoods.split(',').map(String); // Turns neighborhoods into an array
+        let questionString = '(' + neighborhoodArray.map(() => '?').join(', ') + ')'; // Creates a string with ? to be inserted in the sql query
+        if(params.length == 0){
+            sql += " WHERE neighborhood_number IN " + questionString;
+        } else{
+            sql += " AND neighborhood_number IN " + questionString;
+        }
+        neighborhoodArray.forEach((element) => {
+            params.push(element);
+        });
+    }
+    // Query option: limit
+    sql += " ORDER BY date_time DESC LIMIT ?";
+    if(query.hasOwnProperty("limit")){
+        let limit = query.limit;
+        params.push(limit);
+    } else{
+        params.push('1000')
+    }
+
+    // Request sql statement
+    dbSelect(sql, params)
+    .then((rows) => {
+        // Split date and time
+        rows.map((item) => {
+            item.date = item.date_time.split('T')[0];
+            item.time = item.date_time.split('T')[1];
+            delete item.date_time;
+        })
+        // Send finished rows
+        res.status(200).type('json').send(rows);
+    })
+    .catch((error) => {
+        res.status(500).type('txt').send(error);
+    })
 });
 
 // PUT request handler for new crime incident
