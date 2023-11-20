@@ -85,22 +85,17 @@ app.get('/neighborhoods', (req, res) => {
         });
     }
 
-    // Query option: limit
-    sql += " ORDER BY neighborhood_number ASC LIMIT ?";
-    if(query.hasOwnProperty("limit")){
-        let limit = query.limit;
-        params.push(limit);
-    } else{
-        params.push('1000')
-    }
-
     // Request sql statement
     dbSelect(sql, params)
     .then((rows) => {
         //Rename rows
         rows.map((item) => {
+            //neighborhood_number => id
             item.id = item.neighborhood_number;
             delete item.neighborhood_number;
+            //neighborhood_name => name
+            item.name = item.neighborhood_name;
+            delete item.neighborhood_name;
         })
         // Send finished rows
         res.status(200).type('json').send(rows);
