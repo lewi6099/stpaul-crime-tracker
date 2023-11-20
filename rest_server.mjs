@@ -66,8 +66,48 @@ app.get('/codes', (req, res) => {
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = req.query;
+    let sql = 'SELECT * FROM Neighborhoods';
+    let params = [];
+
+    // Query option: start_date
+    if(query.hasOwnProperty("id")) {
+        let neighborhood_numbers = query.id;
+        let neighborhood_numberArray = neighborhood_numbers.split(',').map(String); // Turns neighborhood id's into an array
+        let questionString = '(' + neighborhood_numberArray.map(() => '?').join(', ') + ')';
+        if (params.length == 0) {
+            sql += " WHERE neighborhood_number IN " + questionString;
+        } else {
+            sql += " AND neighborhood_number IN " + questionString;
+        }
+        neighborhood_numberArray.forEach((element) => {
+            params.push(element);
+        });
+    }
+
+    // Query option: limit
+    sql += " ORDER BY neighborhood_number ASC LIMIT ?";
+    if(query.hasOwnProperty("limit")){
+        let limit = query.limit;
+        params.push(limit);
+    } else{
+        params.push('1000')
+    }
+
+    // Request sql statement
+    dbSelect(sql, params)
+    .then((rows) => {
+        //Rename rows
+        rows.map((item) => {
+            item.id = item.neighborhood_number;
+            delete item.neighborhood_number;
+        })
+        // Send finished rows
+        res.status(200).type('json').send(rows);
+    })
+    .catch((error) => {
+        res.status(500).type('txt').send(error);
+    })
 });
 
 // GET request handler for crime incidents
