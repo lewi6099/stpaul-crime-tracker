@@ -201,9 +201,34 @@ app.get('/incidents', (req, res) => {
 
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    let case_number, date_time, code, incident, police_grid, neighborhood_number, block;
+    let sql = 'INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?)';
+
+    // Retrieve all uploaded data
+    case_number = req.body.case_number;
+    code = req.body.code;
+    incident = req.body.incident;
+    police_grid = req.body.police_grid;
+    neighborhood_number = req.body.neighborhood_number;
+    block = req.body.block;
+    date_time = req.body.date + 'T' + req.body.time; // Combine date and time into one field
+    let params = [case_number, date_time, code, incident, police_grid, neighborhood_number, block]; // Set all the parameters
+
+    // Upload all data to database
+    dbRun(sql, params)
+    .then((rows) => {
+        res.status(200).type('txt').send('OK');
+    })
+    .catch((error) => {
+        if(error.errno == 19){
+            res.status(500).type('txt').send('Primary key error: case number ' + case_number + ' already exists');
+        }
+        else{
+            console.log(error);
+            res.status(500).type('txt').send(error);
+        }
+        
+    })
 });
 
 // DELETE request handler for new crime incident
