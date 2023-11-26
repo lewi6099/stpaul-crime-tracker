@@ -232,10 +232,27 @@ app.put('/new-incident', (req, res) => {
 });
 
 // DELETE request handler for new crime incident
-app.delete('/remove-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+app.delete('/remove-incident/:case_number', (req, res) => {
+    let case_number = req.params.case_number;
+
+    let sql = 'DELETE FROM Incidents WHERE case_number = ?'
+    let params = [case_number];
+    console.log(params);
+
+    dbRun(sql, params)
+        .then(() => {
+            res.status(200).type('txt').send('Incident Deleted');
+        })
+        .catch((error) => {
+            if(error.errno == 22){
+                res.status(500).type('txt').send('Error: Incident number ' + case_number + ' does not exist');
+            }
+            else{
+                console.log(error);
+                res.status(500).type('txt').send(error);
+            }
+
+        })
 });
 
 /********************************************************************
