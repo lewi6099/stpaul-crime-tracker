@@ -234,25 +234,33 @@ app.put('/new-incident', (req, res) => {
 // DELETE request handler for new crime incident
 app.delete('/remove-incident/:case_number', (req, res) => {
     let case_number = req.params.case_number;
-
-    let sql = 'DELETE FROM Incidents WHERE case_number = ?'
     let params = [case_number];
-    console.log(params);
+    let sql = 'DELETE FROM incidents WHERE case_number = ?'
+    let case_existence_check = 'SELECT * FROM incidents WHERE case_number = ?';
+    let successful_delete = 'Deleted incident number ' + case_number;
+    let does_not_exist = 'Error: Incident number ' + case_number + ' does not exist';
 
-    dbRun(sql, params)
-        .then(() => {
-            res.status(200).type('txt').send('Incident Deleted');
-        })
-        .catch((error) => {
-            if(error.errno == 22){
-                res.status(500).type('txt').send('Error: Incident number ' + case_number + ' does not exist');
-            }
-            else{
-                console.log(error);
-                res.status(500).type('txt').send(error);
-            }
-
-        })
+    // Request sql statement to check if incident exists
+    dbSelect(case_existence_check, params)
+    .then((rows) => {
+        if(rows.length === 0) {
+            throw does_not_exist;
+        }
+        else {
+            // Delete incident
+            dbRun(sql, params)
+                .then(() => {
+                    res.status(200).type('txt').send(successful_delete);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    res.status(500).type('txt').send(error);
+                })
+        }
+    })
+    .catch((error) => {
+        res.status(500).type('txt').send(error);
+    })
 });
 
 /********************************************************************
