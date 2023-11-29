@@ -59,8 +59,38 @@ function dbRun(query, params) {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = req.query;
+    let sql = 'SELECT * FROM Codes';
+    let params = [];
+
+    if(query.hasOwnProperty("cd")) {
+        let codes = query.cd;
+        let codesArray = codes.split(',').map(String);
+        let questionString = '(' + codesArray.map(() => '?').join(', ') + ')';
+        if (params.length == 0) {
+            sql += " WHERE code IN " + questionString;
+        } else {
+            sql += " AND code IN " + questionString;
+        }
+        codesArray.forEach((element) => {
+            params.push(element);
+        });
+    }
+
+    // Request sql statement
+    dbSelect(sql, params)
+    .then((rows) => {
+        //Rename row
+        rows.map((item) => {
+            item.type = item.incident_type;
+            delete item.incident_type;
+        })
+        // Send finished rows
+        res.status(200).type('json').send(rows);
+    })
+    .catch((error) => {
+        res.status(500).type('txt').send(error);
+    })
 });
 
 // GET request handler for neighborhoods
