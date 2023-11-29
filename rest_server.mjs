@@ -63,8 +63,8 @@ app.get('/codes', (req, res) => {
     let sql = 'SELECT * FROM Codes';
     let params = [];
 
-    if(query.hasOwnProperty("cd")) {
-        let codes = query.cd;
+    if(query.hasOwnProperty("code")) {
+        let codes = query.code;
         let codesArray = codes.split(',').map(String);
         let questionString = '(' + codesArray.map(() => '?').join(', ') + ')';
         if (params.length == 0) {
