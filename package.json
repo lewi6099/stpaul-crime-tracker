@@ -6,8 +6,7 @@
         "name": "",
         "email": ""
     },
-    "contributors": [
-    ],
+    "contributors": [],
     "repository": {},
     "scripts": {
         "dev": "vite",
