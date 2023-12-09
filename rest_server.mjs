@@ -53,6 +53,14 @@ function dbRun(query, params) {
     });
 }
 
+// Gets the next day with the input of a date string
+function getNextDay(inputDate) {
+    const currentDate = new Date(inputDate);
+    currentDate.setDate(currentDate.getDate() + 1);
+    const nextDay = currentDate.toISOString().split('T')[0];
+    return nextDay;
+}
+
 /********************************************************************
  ***   REST REQUEST HANDLERS                                      *** 
  ********************************************************************/
@@ -145,21 +153,22 @@ app.get('/incidents', (req, res) => {
     if(query.hasOwnProperty("start_date")){
         let start_date = query.start_date;
         if(params.length == 0){
-            sql += " WHERE date_time > ?";
+            sql += " WHERE date_time >= ?";
         } else{
-            sql += " AND date_time > ?";
+            sql += " AND date_time >= ?";
         }
         params.push(start_date);
     }
     // Query option: end_date
     if(query.hasOwnProperty("end_date")){
         let end_date = query.end_date;
+        let nextDay = getNextDay(end_date);
         if(params.length == 0){
             sql += " WHERE date_time < ?";
         } else{
             sql += " AND date_time < ?";
         }
-        params.push(end_date);
+        params.push(nextDay);
     }
     // Query option: code
     if(query.hasOwnProperty("code")){
@@ -262,34 +271,38 @@ app.put('/new-incident', (req, res) => {
 });
 
 // DELETE request handler for new crime incident
-app.delete('/remove-incident/:case_number', (req, res) => {
-    let case_number = req.params.case_number;
+app.delete('/remove-incident', (req, res) => {
+    let case_number = req.body.case_number;
     let params = [case_number];
     let sql = 'DELETE FROM incidents WHERE case_number = ?'
     let case_existence_check = 'SELECT * FROM incidents WHERE case_number = ?';
     let successful_delete = 'Deleted incident number ' + case_number;
     let does_not_exist = 'Error: Incident number ' + case_number + ' does not exist';
+    let dupeCheck;
 
     // Request sql statement to check if incident exists
     dbSelect(case_existence_check, params)
     .then((rows) => {
-        if(rows.length === 0) {
-            throw does_not_exist;
+        
+        if(rows.length == 0) {
+            dupeCheck = true;
         }
         else {
-            // Delete incident
-            dbRun(sql, params)
-                .then(() => {
-                    res.status(200).type('txt').send(successful_delete);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    res.status(500).type('txt').send(error);
-                })
+            dupeCheck = false;
+        }
+    })
+    .then(dbRun(sql, params))
+    .then(() => {
+        if(dupeCheck == true){
+            res.status(500).type('txt').send(does_not_exist);
+        }
+        else {
+            res.status(200).type('txt').send(successful_delete);
         }
     })
     .catch((error) => {
-        res.status(500).type('txt').send(error);
+        console.log(error);
+            res.status(500).type('txt').send(error);
     })
 });
 
