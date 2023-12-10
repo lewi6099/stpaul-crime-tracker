@@ -3,15 +3,18 @@ import { reactive, ref, onMounted } from 'vue'
 
 let crime_url = ref('');
 let dialog_err = ref(false);
+let locationLat = ref(44.955139);
+let locationLng = ref(-93.102222);
+let zoom = ref(12);
 let map = reactive(
     {
         leaflet: null,
         center: {
-            lat: 44.955139,
-            lng: -93.102222,
+            lat: locationLat.value,
+            lng: locationLng.value,
             address: ''
         },
-        zoom: 12,
+        zoom: zoom.value,
         bounds: {
             nw: {lat: 45.008206, lng: -93.217977},
             se: {lat: 44.883658, lng: -92.993787}
@@ -37,7 +40,6 @@ let map = reactive(
         ]
     }
 );
-
 // Vue callback for once <template> HTML has been added to web page
 onMounted(() => {
     // Create Leaflet map (set bounds and valied zoom levels)
@@ -64,8 +66,10 @@ onMounted(() => {
     .catch((error) => {
         console.log('Error:', error);
     });
-});
 
+    // Leaflet event listener for when the map moves by panning
+    map.leaflet.on("moveend", updateModelCords);
+});
 
 // FUNCTIONS
 // Function called once user has entered REST API URL
@@ -87,6 +91,61 @@ function closeDialog() {
         dialog_err.value = true;
     }
 }
+
+// Function called when user inputs latitude, longitude, or address
+function submitCords(){
+    const inputLat = document.getElementById('input-lat').value;
+    const inputLng = document.getElementById('input-lng').value;
+    const inputAddress = document.getElementById('input-address').value;
+    // Calculate cordinates and move map from address input
+    if(inputAddress){
+        let apiURL1 = "https://nominatim.openstreetmap.org/search?q=";
+        let apiURL2 = "&format=json&limit=1";
+        fetch(apiURL1 + inputAddress + apiURL2)
+        .then((response) => {
+            return response.json();
+        })
+        .then((newResponse) => {
+            if(newResponse[0] == undefined){
+                alert("Location not found: Please enter a valid location or address")
+            }
+            let responseLat = newResponse[0].lat;
+            let responseLng = newResponse[0].lon;
+            console.log(responseLat);
+            if(checkBounds(responseLat, responseLng)){
+                locationLat.value = responseLat;
+                locationLng.value = responseLng;
+                map.leaflet.setView([locationLat.value, locationLng.value], 13.5);
+            } else{
+                alert("Cordinates specified are not in bounds");
+            }
+            
+        })
+    }
+    // Move map from lat/lng input
+    else {
+        if(checkBounds(inputLat, inputLng)){
+            map.leaflet.setView([inputLat, inputLng], 13.5);
+        } else {
+            alert("Cordinates specified are not in bounds");
+        }
+        
+    }
+}
+
+// Update cords based on panning in model
+function updateModelCords() {
+    locationLat.value = map.leaflet.getCenter().lat;
+    locationLng.value = map.leaflet.getCenter().lng;
+    document.getElementById('input-address').value = '';
+}
+
+// Check if cords are inbounds
+function checkBounds(latCord, lngCord){
+    const mapBounds = map.leaflet.getBounds();
+    const coordinates = L.latLng(latCord, lngCord);
+    return mapBounds.contains(coordinates);
+}
 </script>
 
 <template>
@@ -102,6 +161,14 @@ function closeDialog() {
         <div class="grid-x grid-padding-x">
             <div id="leafletmap" class="cell auto"></div>
         </div>
+    <!--User cords or address input box-->
+    <div class="user-input">
+        <label>Latitude: </label><input id="input-lat" class="space-right" type="text" v-model="locationLat">
+        <label>Longitude: </label><input id="input-lng" class="space-right" type="text" v-model="locationLng">
+        <label>Address: </label><input id="input-address" class="space-right" type="text" placeholder="Enter valid address">
+        <button id="submit-button" type="button" @click="submitCords">Go</button>
+    </div>
+
     </div>
 </template>
 
@@ -134,4 +201,37 @@ function closeDialog() {
     font-size: 1rem;
     color: #D32323;
 }
+
+/* User data entry form*/
+#input-lat,
+#input-lng {
+    width: 200px;
+    margin-right: 10px;
+    margin:10px;
+}
+
+#input-address {
+    width: 350px;
+    margin-right: 10px;
+    margin:10px;
+}
+
+.user-input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+#submit-button {
+    padding: 8px 15px;
+    border-radius: 5px;
+    background-color: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+}
+
 </style>
