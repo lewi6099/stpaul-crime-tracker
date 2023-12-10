@@ -3,13 +3,20 @@ import * as url from 'node:url';
 
 import { default as express } from 'express';
 import { default as sqlite3 } from 'sqlite3';
+import cors from 'cors';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 const port = 8000;
 
+const corsOptions = {
+    // If using a different port for Vue app, update that here...
+    origin: "http://localhost:5173",
+};
+
 let app = express();
+app.use(cors(corsOptions));
 app.use(express.json());
 
 /********************************************************************

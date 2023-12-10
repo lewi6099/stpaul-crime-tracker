@@ -1,11 +1,19 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted } from 'vue';
+import CrimeRow from './components/CrimeRow.vue';
 
+// Initialize crime URL
 let crime_url = ref('');
 let dialog_err = ref(false);
+
+// Initialize codes and crimes
+let neighborhoods;
+let crimes = reactive([]);
+
+// Initialize configurations and map
+let zoom = ref(12);
 let locationLat = ref(44.955139);
 let locationLng = ref(-93.102222);
-let zoom = ref(12);
 let map = reactive(
     {
         leaflet: null,
@@ -74,8 +82,20 @@ onMounted(() => {
 // FUNCTIONS
 // Function called once user has entered REST API URL
 function initializeCrimes() {
-    // TODO: get code and neighborhood data
-    //       get initial 1000 crimes
+    fetch(crime_url.value + '/neighborhoods')
+    .then((response) => {
+        return response.json();
+    })
+    .then((newReponse) => {
+        neighborhoods = newReponse;
+        console.log(neighborhoods);
+    })
+    .then(() => {
+        getIncidents('limit=100');
+    })
+    .catch((error) => {
+        console.log(error);
+    })
 }
 
 // Function called when user presses 'OK' on dialog box
@@ -92,7 +112,7 @@ function closeDialog() {
     }
 }
 
-// Function called when user inputs latitude, longitude, or address
+// Function called when user inputs latitude, longitude, or address and presses 'GO'
 function submitCords(){
     const inputLat = document.getElementById('input-lat').value;
     const inputLng = document.getElementById('input-lng').value;
@@ -146,6 +166,33 @@ function checkBounds(latCord, lngCord){
     const coordinates = L.latLng(latCord, lngCord);
     return mapBounds.contains(coordinates);
 }
+
+// Function to get incidents
+function getIncidents(params) {
+    fetch(crime_url.value + '/incidents?' + params)
+    .then((response) => {
+        return response.json();
+    })
+    .then((newResponse) => {
+        newResponse.forEach((index) => {
+            let neighborhood_name = neighborhoods.find(neighborhood => neighborhood.id === index.neighborhood_number);
+            crimes.push({
+                case_number: index.case_number,
+                code: index.code,
+                incident: index.incident,
+                police_grid: index.police_grid,
+                neighborhood_name: neighborhood_name.name,
+                block: index.block,
+                date: index.date,
+                time: index.time
+            })
+        })
+        console.log(crimes.value);
+    })
+    .catch((error) => {
+        console.log(error);
+    })
+}
 </script>
 
 <template>
@@ -161,6 +208,7 @@ function checkBounds(latCord, lngCord){
         <div class="grid-x grid-padding-x">
             <div id="leafletmap" class="cell auto"></div>
         </div>
+        
     <!--User cords or address input box-->
     <div class="user-input">
         <label>Latitude: </label><input id="input-lat" class="space-right" type="text" v-model="locationLat">
@@ -170,6 +218,25 @@ function checkBounds(latCord, lngCord){
     </div>
 
     </div>
+
+    <!-- Crime table -->
+    <table v-if="crimes.length > 0">
+        <thead>
+            <tr>
+                <th>Case Number</th>
+                <th>Code</th>
+                <th>Incident</th>
+                <th>Police Grid</th>
+                <th>Neighborhood Name</th>
+                <th>Block</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <CrimeRow v-for="item in crimes" :data="item"></CrimeRow>
+        </tbody>
+    </table>
 </template>
 
 <style>
