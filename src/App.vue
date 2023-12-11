@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import CrimeRow from './components/CrimeRow.vue';
+import NewCrimeForm from './components/NewCrimeForm.vue';
 
 // Initialize crime URL
 let crime_url = ref('');
@@ -88,7 +89,6 @@ function initializeCrimes() {
     })
     .then((newReponse) => {
         neighborhoods = newReponse;
-        console.log(neighborhoods);
     })
     .then(() => {
         getIncidents('limit=100');
@@ -187,7 +187,6 @@ function getIncidents(params) {
                 time: index.time
             })
         })
-        console.log(crimes.value);
     })
     .catch((error) => {
         console.log(error);
@@ -216,6 +215,8 @@ function getIncidents(params) {
         <label>Address: </label><input id="input-address" class="space-right" type="text" placeholder="Enter valid address">
         <button id="submit-button" type="button" @click="submitCords">Go</button>
     </div>
+
+    <NewCrimeForm v-if="crimes.length > 0" :api_url="crime_url"></NewCrimeForm>
 
     </div>
 
