@@ -91,7 +91,7 @@ function initializeCrimes() {
         neighborhoods = newReponse;
     })
     .then(() => {
-        getIncidents('limit=100');
+        getIncidents('limit=1000');
     })
     .catch((error) => {
         console.log(error);
@@ -232,10 +232,11 @@ function getIncidents(params) {
                 <th>Block</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            <CrimeRow v-for="item in crimes" :data="item"></CrimeRow>
+            <CrimeRow v-for="item in crimes" :data="item" :api_url="crime_url"></CrimeRow>
         </tbody>
     </table>
 </template>
