@@ -25,8 +25,8 @@
 
     function submitNewCrime(){
         // Check for all data filled in
-        if(!code.value || !code.value || ! incident.value || police_grid.value || neighborhood_number.value || block.value || date.value || time.value) {
-            alert("Crime entry unsuccessful: Duplicate case number");
+        if(!code.value || !code.value || !incident.value || !police_grid.value || !neighborhood_number.value || !block.value || !date.value || !time.value) {
+            alert("Crime entry unsuccessful: Fill all inputs");
             return;
         }
 
@@ -55,6 +55,14 @@
             if(response.status == 500){ // Check for duplicate case number
                 alert("Crime entry unsuccessful: Duplicate case number");
             } else { // Successful entry
+                case_number.value = '';
+                code.value = '';
+                incident.value = '';
+                police_grid.value = '';
+                neighborhood_number.value = '';
+                block.value = '';
+                date.value = '';
+                time.value = '';
                 alert("Crime successfully added");
             }
         })
