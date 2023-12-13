@@ -28,6 +28,7 @@ let map = reactive(
             nw: {lat: 45.008206, lng: -93.217977},
             se: {lat: 44.883658, lng: -92.993787}
         },
+      //These are icons that show up on the map
         neighborhood_markers: [
             {location: [44.942068, -93.020521], marker: null},
             {location: [44.977413, -93.025156], marker: null},
@@ -59,6 +60,11 @@ onMounted(() => {
         maxZoom: 18
     }).addTo(map.leaflet);
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
+
+    //Add markers to the neighborhoods
+    for (let i=0; i < map.neighborhood_markers.length; ++i ) {
+        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]]).addTo(map.leaflet);
+    }
 
     // Get boundaries for St. Paul neighborhoods
     let district_boundary = new L.geoJson();
