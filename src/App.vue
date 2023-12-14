@@ -299,13 +299,32 @@ function getIncidents(params) {
                 <th></th>
             </tr>
         </thead>
-        <tbody>
-            <CrimeRow v-for="item in crimes" :data="item" :api_url="crime_url"></CrimeRow>
+        <tbody v-for="item in crimes">
+            <!-- Assault -->
+            <CrimeRow v-if="item.code >= 400 && item.code <= 460 || item.code >= 861 && item.code <= 870" id='violent' :data="item" :api_url="crime_url"/>
+            <!-- Property Crimes -->
+            <CrimeRow v-else-if="item.code <= 800 || item.code >= 1400 && item.code <= 1430" id='property' :data="item" :api_url="crime_url"/>
+            <!-- Narcotics -->
+            <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1860" id='narcotics' :data="item" :api_url="crime_url"/>
+            <!-- Other Crimes -->
+            <CrimeRow v-else id='other' :data="item" :api_url="crime_url"/>
         </tbody>
     </table>
 </template>
 
 <style>
+#violent{
+  background-color: lightcoral;
+}
+#property {
+  background-color: darkseagreen;
+}
+#narcotics{
+  background-color: #C4A484;
+}
+#other{
+  background-color: floralwhite;
+}
 #rest-dialog {
     width: 20rem;
     margin-top: 1rem;
