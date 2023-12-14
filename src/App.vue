@@ -6,10 +6,30 @@ import NewCrimeForm from './components/NewCrimeForm.vue';
 // Initialize crime URL
 let crime_url = ref('');
 let dialog_err = ref(false);
+let valid_url = ref(false);
 
 // Initialize codes and crimes
 let neighborhoods;
 let crimes = reactive([]);
+const nCords = [
+    [44.942068, -93.020521, 'Conway / Battlecreek / Highwood', 1],
+    [44.977413, -93.025156, 'Greater East Side', 2],
+    [44.931244, -93.079578, 'West Side', 3],
+    [44.956192, -93.060189, 'Dayton\'s Bluff', 4],
+    [44.978883, -93.068163, 'Payne / Phalen', 5],
+    [44.975766, -93.113887, 'North End', 6],
+    [44.959639, -93.121271, 'Thomas / Dale(Frogtown)', 7],
+    [44.947700, -93.128505, 'Summit / University', 8],
+    [44.930276, -93.119911, 'West Seventh / Fort Road', 9],
+    [44.982752, -93.147910, 'Como Park (Como)', 10],
+    [44.963631, -93.167548, 'Hamline / Widway', 11],
+    [44.973971, -93.197965, 'Saint Anthony Park', 12],
+    [44.949043, -93.178261, 'Union Park', 13],
+    [44.934848, -93.176736, 'Macalester / Groveland', 14],
+    [44.913106, -93.170779, 'Highland', 15],
+    [44.937705, -93.136997, 'Summit Hill', 16],
+    [44.949203, -93.093739, 'Downtown (Capitol River)', 17],
+]; // lat, lng, name, id
 
 // Initialize configurations and map
 let zoom = ref(12);
@@ -30,23 +50,23 @@ let map = reactive(
         },
       //These are icons that show up on the map
         neighborhood_markers: [
-            {location: [44.942068, -93.020521], marker: null},
-            {location: [44.977413, -93.025156], marker: null},
-            {location: [44.931244, -93.079578], marker: null},
-            {location: [44.956192, -93.060189], marker: null},
-            {location: [44.978883, -93.068163], marker: null},
-            {location: [44.975766, -93.113887], marker: null},
-            {location: [44.959639, -93.121271], marker: null},
-            {location: [44.947700, -93.128505], marker: null},
-            {location: [44.930276, -93.119911], marker: null},
-            {location: [44.982752, -93.147910], marker: null},
-            {location: [44.963631, -93.167548], marker: null},
-            {location: [44.973971, -93.197965], marker: null},
-            {location: [44.949043, -93.178261], marker: null},
-            {location: [44.934848, -93.176736], marker: null},
-            {location: [44.913106, -93.170779], marker: null},
-            {location: [44.937705, -93.136997], marker: null},
-            {location: [44.949203, -93.093739], marker: null}
+            {location: [nCords[0][0],nCords[0][1]], marker: null},
+            {location: [nCords[1][0],nCords[1][1]], marker: null},
+            {location: [nCords[2][0],nCords[2][1]], marker: null},
+            {location: [nCords[3][0],nCords[3][1]], marker: null},
+            {location: [nCords[4][0],nCords[4][1]], marker: null},
+            {location: [nCords[5][0],nCords[5][1]], marker: null},
+            {location: [nCords[6][0],nCords[6][1]], marker: null},
+            {location: [nCords[7][0],nCords[7][1]], marker: null},
+            {location: [nCords[8][0],nCords[8][1]], marker: null},
+            {location: [nCords[9][0],nCords[9][1]], marker: null},
+            {location: [nCords[10][0],nCords[10][1]], marker: null},
+            {location: [nCords[11][0],nCords[11][1]], marker: null},
+            {location: [nCords[12][0],nCords[12][1]], marker: null},
+            {location: [nCords[13][0],nCords[13][1]], marker: null},
+            {location: [nCords[14][0],nCords[14][1]], marker: null},
+            {location: [nCords[15][0],nCords[15][1]], marker: null},
+            {location: [nCords[16][0],nCords[16][1]], marker: null}
         ]
     }
 );
@@ -63,7 +83,8 @@ onMounted(() => {
 
     //Add markers to the neighborhoods
     for (let i=0; i < map.neighborhood_markers.length; ++i ) {
-        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]]).addTo(map.leaflet);
+        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]]).addTo(map.leaflet)
+            .bindPopup(nCords[i][2]);
     }
 
     // Get boundaries for St. Paul neighborhoods
@@ -110,6 +131,7 @@ function closeDialog() {
     let url_input = document.getElementById('dialog-url');
     if (crime_url.value !== '' && url_input.checkValidity()) {
         dialog_err.value = false;
+        valid_url.value = true;
         dialog.close();
         initializeCrimes();
     }
@@ -120,10 +142,17 @@ function closeDialog() {
 
 // Function called when user inputs latitude, longitude, or address and presses 'GO'
 function submitCords(){
+    function update() {
+        setTimeout(function () {
+            updateCrimes();
+        }, 250);
+    }
     const inputLat = document.getElementById('input-lat').value;
     const inputLng = document.getElementById('input-lng').value;
     const inputAddress = document.getElementById('input-address').value;
-    // Calculate cordinates and move map from address input
+    const center = map.leaflet.getCenter();
+
+    // Address input
     if(inputAddress){
         let apiURL1 = "https://nominatim.openstreetmap.org/search?q=";
         let apiURL2 = "&format=json&limit=1";
@@ -137,26 +166,44 @@ function submitCords(){
             }
             let responseLat = newResponse[0].lat;
             let responseLng = newResponse[0].lon;
-            console.log(responseLat);
             if(checkBounds(responseLat, responseLng)){
                 locationLat.value = responseLat;
                 locationLng.value = responseLng;
                 map.leaflet.setView([locationLat.value, locationLng.value], 13.5);
+                update();
             } else{
                 alert("Cordinates specified are not in bounds");
             }
-            
         })
     }
-    // Move map from lat/lng input
-    else {
+    // Lat/lng input
+    else if(center.lat != inputLat || center.lng != inputLng){
         if(checkBounds(inputLat, inputLng)){
             map.leaflet.setView([inputLat, inputLng], 13.5);
+            update();
         } else {
             alert("Cordinates specified are not in bounds");
         }
-        
     }
+    // Update map if there is no movement
+    else {
+        update();
+    }
+}
+
+function updateCrimes(){
+    let newNeighborhoods = [];
+    nCords.forEach((neighborhood) => {
+        let lat = neighborhood[0];
+        let lng = neighborhood[1];
+        if(checkViewBounds(lat, lng)){
+            newNeighborhoods.push(neighborhood[3]);
+        }
+    })
+    let params = 'limit=1000&neighborhood=';
+    let resultString = newNeighborhoods.join(',');
+    params += resultString;
+    getIncidents(params);
 }
 
 // Update cords based on panning in model
@@ -168,9 +215,19 @@ function updateModelCords() {
 
 // Check if cords are inbounds
 function checkBounds(latCord, lngCord){
-    const mapBounds = map.leaflet.getBounds();
+    const outerBounds = L.latLngBounds(
+        L.latLng(45.008206, -93.217977),
+        L.latLng(44.883658, -92.993787)
+    );
     const coordinates = L.latLng(latCord, lngCord);
-    return mapBounds.contains(coordinates);
+    return outerBounds.contains(coordinates);
+}
+
+// Check if cords are in viewing zone
+function checkViewBounds(latCord, lngCord){
+    const mapView = map.leaflet.getBounds();
+    const coordinates = L.latLng(latCord, lngCord);
+    return mapView.contains(coordinates);
 }
 
 // Function to get incidents
@@ -180,6 +237,7 @@ function getIncidents(params) {
         return response.json();
     })
     .then((newResponse) => {
+        crimes.splice(0, crimes.length);
         newResponse.forEach((index) => {
             let neighborhood_name = neighborhoods.find(neighborhood => neighborhood.id === index.neighborhood_number);
             crimes.push({
@@ -222,7 +280,7 @@ function getIncidents(params) {
         <button id="submit-button" type="button" @click="submitCords">Go</button>
     </div>
 
-    <NewCrimeForm v-if="crimes.length > 0" :api_url="crime_url"></NewCrimeForm>
+    <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
 
     </div>
 
