@@ -3,6 +3,8 @@
     import { ref } from 'vue';
     let showRow = ref(true);
     let url = props.api_url + '/remove-incident';
+
+    // Function deletes a case
     function deleteCase() {
         // Set request data
         const requestData = {
@@ -30,7 +32,6 @@
             console.log(error);
         })
     }
-
 </script>
 
 <template>

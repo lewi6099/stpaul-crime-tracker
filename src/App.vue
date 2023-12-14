@@ -8,6 +8,9 @@ let crime_url = ref('');
 let dialog_err = ref(false);
 let valid_url = ref(false);
 
+// Initialize crime markers array
+let crimeMarkers = [];
+
 // Initialize codes and crimes
 let neighborhoods;
 let crimes = reactive([]);
@@ -256,6 +259,52 @@ function getIncidents(params) {
         console.log(error);
     })
 }
+
+// Function that handles if a crime row is clicked
+function handleCrimeClick(data) {
+    // Replaces X in the first part of an address
+    const newIcon = new L.Icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    function replaceX(string) {
+        const spaceIndex = string.split(' ');
+        spaceIndex[0] = spaceIndex[0].replace(/x/gi, '0');
+        return spaceIndex.join(' ');
+    }
+    let address = data.block;
+    address = replaceX(address);
+    let inputAddress = address + ', St. Paul, MN';
+    let apiURL1 = "https://nominatim.openstreetmap.org/search?q=";
+    let apiURL2 = "&format=json&limit=1";
+    fetch(apiURL1 + inputAddress + apiURL2)
+    .then((response) => {
+        return response.json();
+    })
+    .then((newResponse) => {
+        if(newResponse[0] == undefined){
+            alert("Not enough information available to generate a pin");
+            return;
+        }
+        let responseLat = newResponse[0].lat;
+        let responseLng = newResponse[0].lon;
+        // Generate marker
+        let marker = L.marker([responseLat, responseLng], {icon: newIcon}).addTo(map.leaflet)
+            .bindPopup(address);
+        crimeMarkers.push(marker);
+    })
+}
+
+// Function that handles erasing all added markers
+function handleClearMarkers(){
+    crimeMarkers.forEach((marker) => {
+        map.leaflet.removeLayer(marker);
+        console.log(marker);
+    });
+}
 </script>
 
 <template>
@@ -280,8 +329,12 @@ function getIncidents(params) {
         <button id="submit-button" type="button" @click="submitCords">Go</button>
     </div>
 
-    <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
+    <div>
+        <button id="clear-markers" @click="handleClearMarkers">Clear Markers</button>
+    </div>
 
+    <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
+    
     <div id="legendArrangement">
         <p style="font-size: large"> Crime Types: </p>
         <p class="legend" style="background-color: lightcoral;"> Violent </p>
@@ -309,18 +362,27 @@ function getIncidents(params) {
         </thead>
         <tbody v-for="item in crimes">
             <!-- Assault -->
-            <CrimeRow v-if="item.code >= 400 && item.code <= 460 || item.code >= 861 && item.code <= 870" id='violent' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-if="item.code >= 400 && item.code <= 460 || item.code >= 861 && item.code <= 870" @click="handleCrimeClick(item)" id='violent' :data="item" :api_url="crime_url"/>
             <!-- Property Crimes -->
-            <CrimeRow v-else-if="item.code <= 800 || item.code >= 1400 && item.code <= 1430" id='property' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-else-if="item.code <= 800 || item.code >= 1400 && item.code <= 1430" @click="handleCrimeClick(item)" id='property' :data="item" :api_url="crime_url"/>
             <!-- Narcotics -->
-            <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1885" id='narcotics' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1885" @click="handleCrimeClick(item)" id='narcotics' :data="item" :api_url="crime_url"/>
             <!-- Other Crimes -->
-            <CrimeRow v-else id='other' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-else @click="handleCrimeClick(item)" id='other' :data="item" :api_url="crime_url" />
         </tbody>
     </table>
 </template>
 
 <style>
+#clear-markers {
+    background-color: rgb(251, 90, 90);
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 #violent{
   background-color: lightcoral;
 }
@@ -332,6 +394,12 @@ function getIncidents(params) {
 }
 #other{
   background-color: floralwhite;
+}
+#other:hover,
+#violent:hover,
+#property:hover,
+#narcotics:hover {
+    background-color: #b4b4b4;
 }
 #legendArrangement {
   display: flex;
