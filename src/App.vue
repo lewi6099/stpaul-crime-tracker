@@ -282,6 +282,14 @@ function getIncidents(params) {
 
     <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
 
+    <div id="legendArrangement">
+        <p style="font-size: large"> Crime Types: </p>
+        <p class="legend" style="background-color: lightcoral;"> Violent </p>
+        <p class="legend" style="background-color: darkseagreen;"> Property </p>
+        <p class="legend" style="background-color: #C4A484;"> Narcotic </p>
+        <p class="legend" style="background-color: floralwhite;"> Other </p>
+    </div>
+
     </div>
 
     <!-- Crime table -->
@@ -305,7 +313,7 @@ function getIncidents(params) {
             <!-- Property Crimes -->
             <CrimeRow v-else-if="item.code <= 800 || item.code >= 1400 && item.code <= 1430" id='property' :data="item" :api_url="crime_url"/>
             <!-- Narcotics -->
-            <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1860" id='narcotics' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1885" id='narcotics' :data="item" :api_url="crime_url"/>
             <!-- Other Crimes -->
             <CrimeRow v-else id='other' :data="item" :api_url="crime_url"/>
         </tbody>
@@ -324,6 +332,18 @@ function getIncidents(params) {
 }
 #other{
   background-color: floralwhite;
+}
+#legendArrangement {
+  display: flex;
+  justify-content: space-evenly;
+  width: 50%;
+  margin: 10px auto;
+  flex-direction: row;
+  align-items: center;
+}
+.legend {
+  padding: 10px 20px;
+  font-size: large;
 }
 #rest-dialog {
     width: 20rem;
