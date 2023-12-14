@@ -9,7 +9,7 @@ let dialog_err = ref(false);
 let valid_url = ref(false);
 
 // Initialize crime markers array
-let crimeMarkers = [];
+let crimeMarkers = reactive([]);
 
 // Initialize codes and crimes
 let neighborhoods;
@@ -304,6 +304,8 @@ function handleClearMarkers(){
         map.leaflet.removeLayer(marker);
         console.log(marker);
     });
+    crimeMarkers.splice(0, crimes.length);
+
 }
 </script>
 
@@ -329,7 +331,7 @@ function handleClearMarkers(){
         <button id="submit-button" type="button" @click="submitCords">Go</button>
     </div>
 
-    <div>
+    <div v-if="crimeMarkers.length > 0">
         <button id="clear-markers" @click="handleClearMarkers">Clear Markers</button>
     </div>
 
