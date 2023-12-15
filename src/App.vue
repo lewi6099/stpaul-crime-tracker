@@ -84,9 +84,18 @@ onMounted(() => {
     }).addTo(map.leaflet);
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
 
+    //Create green icon
+    const greenIcon = new L.Icon({
+      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
     //Add markers to the neighborhoods
     for (let i=0; i < map.neighborhood_markers.length; ++i ) {
-        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]]).addTo(map.leaflet)
+        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]], {icon: greenIcon})
+            .addTo(map.leaflet)
             .bindPopup(nCords[i][2]);
     }
 
@@ -262,14 +271,15 @@ function getIncidents(params) {
 
 // Function that handles if a crime row is clicked
 function handleCrimeClick(data) {
-    // Replaces X in the first part of an address
-    const newIcon = new L.Icon({
-        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    //Create red icon for crimes
+    const redIcon = new L.Icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
+    // Replaces X in the first part of an address
     function replaceX(string) {
         const spaceIndex = string.split(' ');
         spaceIndex[0] = spaceIndex[0].replace(/x/gi, '0');
@@ -292,7 +302,7 @@ function handleCrimeClick(data) {
         let responseLat = newResponse[0].lat;
         let responseLng = newResponse[0].lon;
         // Generate marker
-        let marker = L.marker([responseLat, responseLng], {icon: newIcon}).addTo(map.leaflet)
+        let marker = L.marker([responseLat, responseLng], {icon: redIcon}).addTo(map.leaflet)
             .bindPopup(address);
         crimeMarkers.push(marker);
     })
