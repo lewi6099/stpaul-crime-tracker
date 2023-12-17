@@ -15,24 +15,24 @@ let crimeMarkers = reactive([]);
 let neighborhoods;
 let crimes = reactive([]);
 const nCords = [
-    [44.942068, -93.020521, 'Conway / Battlecreek / Highwood', 1],
-    [44.977413, -93.025156, 'Greater East Side', 2],
-    [44.931244, -93.079578, 'West Side', 3],
-    [44.956192, -93.060189, 'Dayton\'s Bluff', 4],
-    [44.978883, -93.068163, 'Payne / Phalen', 5],
-    [44.975766, -93.113887, 'North End', 6],
-    [44.959639, -93.121271, 'Thomas / Dale(Frogtown)', 7],
-    [44.947700, -93.128505, 'Summit / University', 8],
-    [44.930276, -93.119911, 'West Seventh / Fort Road', 9],
-    [44.982752, -93.147910, 'Como Park (Como)', 10],
-    [44.963631, -93.167548, 'Hamline / Widway', 11],
-    [44.973971, -93.197965, 'Saint Anthony Park', 12],
-    [44.949043, -93.178261, 'Union Park', 13],
-    [44.934848, -93.176736, 'Macalester / Groveland', 14],
-    [44.913106, -93.170779, 'Highland', 15],
-    [44.937705, -93.136997, 'Summit Hill', 16],
-    [44.949203, -93.093739, 'Downtown (Capitol River)', 17],
-]; // lat, lng, name, id
+    [44.942068, -93.020521, 'Conway / Battlecreek / Highwood', 1, 0],
+    [44.977413, -93.025156, 'Greater East Side', 2, 0],
+    [44.931244, -93.079578, 'West Side', 3, 0],
+    [44.956192, -93.060189, 'Dayton\'s Bluff', 4, 0],
+    [44.978883, -93.068163, 'Payne / Phalen', 5, 0],
+    [44.975766, -93.113887, 'North End', 6, 0],
+    [44.959639, -93.121271, 'Thomas / Dale(Frogtown)', 7, 0],
+    [44.947700, -93.128505, 'Summit / University', 8, 0],
+    [44.930276, -93.119911, 'West Seventh / Fort Road', 9, 0],
+    [44.982752, -93.147910, 'Como Park (Como)', 10, 0],
+    [44.963631, -93.167548, 'Hamline / Widway', 11, 0],
+    [44.973971, -93.197965, 'Saint Anthony Park', 12, 0],
+    [44.949043, -93.178261, 'Union Park', 13, 0],
+    [44.934848, -93.176736, 'Macalester / Groveland', 14, 0],
+    [44.913106, -93.170779, 'Highland', 15, 0],
+    [44.937705, -93.136997, 'Summit Hill', 16, 0],
+    [44.949203, -93.093739, 'Downtown (Capitol River)', 17, 0],
+]; // lat, lng, name, id, number of crimes
 
 // Initialize configurations and map
 let zoom = ref(12);
@@ -83,21 +83,6 @@ onMounted(() => {
         maxZoom: 18
     }).addTo(map.leaflet);
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
-
-    //Create green icon
-    const greenIcon = new L.Icon({
-      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-    //Add markers to the neighborhoods
-    for (let i=0; i < map.neighborhood_markers.length; ++i ) {
-        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]], {icon: greenIcon})
-            .addTo(map.leaflet)
-            .bindPopup(nCords[i][2]);
-    }
 
     // Get boundaries for St. Paul neighborhoods
     let district_boundary = new L.geoJson();
@@ -203,6 +188,7 @@ function submitCords(){
     }
 }
 
+// Function checks which neighborhoods are in view and calls getIncidents()
 function updateCrimes(){
     let newNeighborhoods = [];
     nCords.forEach((neighborhood) => {
@@ -249,6 +235,7 @@ function getIncidents(params) {
         return response.json();
     })
     .then((newResponse) => {
+        updateNeighborhoodMarkers(newResponse);
         crimes.splice(0, crimes.length);
         newResponse.forEach((index) => {
             let neighborhood_name = neighborhoods.find(neighborhood => neighborhood.id === index.neighborhood_number);
@@ -271,8 +258,8 @@ function getIncidents(params) {
 
 // Function that handles if a crime row is clicked
 function handleCrimeClick(data) {
-    //Create red icon for crimes
-    const redIcon = new L.Icon({
+    // Create red icon for crimes
+    const newIcon = new L.Icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
@@ -285,6 +272,7 @@ function handleCrimeClick(data) {
         spaceIndex[0] = spaceIndex[0].replace(/x/gi, '0');
         return spaceIndex.join(' ');
     }
+    
     let address = data.block;
     address = replaceX(address);
     let inputAddress = address + ', St. Paul, MN';
@@ -301,9 +289,36 @@ function handleCrimeClick(data) {
         }
         let responseLat = newResponse[0].lat;
         let responseLng = newResponse[0].lon;
+        // Generate HTML object
+        let div = document.createElement('containerDiv');
+        let deleteButton = document.createElement('button');
+        deleteButton.innerText = 'Delete Marker';
+        deleteButton.style.backgroundColor = 'grey';
+        deleteButton.style.color = 'white';
+        let date = document.createElement('p');
+        date.textContent = 'Date: '+ data.date;
+        let time = document.createElement('p');
+        time.textContent = 'Time: '+ data.time;
+        let incident = document.createElement('p');
+        incident.textContent = 'Incident: '+ data.incident;
+        div.appendChild(date);
+        div.appendChild(time);
+        div.appendChild(incident);
+        div.appendChild(deleteButton);
+
+        // Function for when the delete button is pressed
+        deleteButton.onclick = function() {
+            map.leaflet.removeLayer(marker);
+            crimeMarkers.forEach((mark) => {
+            if(mark._leaflet_id == marker._leaflet_id){
+                crimeMarkers.pop(mark);
+            }
+        })
+        }
+
         // Generate marker
-        let marker = L.marker([responseLat, responseLng], {icon: redIcon}).addTo(map.leaflet)
-            .bindPopup(address);
+        let marker = L.marker([responseLat, responseLng], {icon: newIcon}).addTo(map.leaflet)
+            .bindPopup(div);
         crimeMarkers.push(marker);
     })
 }
@@ -312,10 +327,36 @@ function handleCrimeClick(data) {
 function handleClearMarkers(){
     crimeMarkers.forEach((marker) => {
         map.leaflet.removeLayer(marker);
-        console.log(marker);
     });
     crimeMarkers.splice(0, crimes.length);
 
+}
+
+// Function that updates the neighborhood markers depending on the amount of crimes commited
+function updateNeighborhoodMarkers(crimes){
+    nCords.forEach((neighborhood) => {
+        neighborhood[4] = 0;
+    })
+
+    crimes.forEach((crime) => {
+        nCords[crime.neighborhood_number - 1][4] = nCords[crime.neighborhood_number - 1][4] + 1;
+
+    })
+
+    //Create green icon
+    const greenIcon = new L.Icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+        });
+
+    //Add markers to the neighborhoods
+    for (let i = 0; i < map.neighborhood_markers.length; i++) {
+        L.marker([map.neighborhood_markers[i].location[0], map.neighborhood_markers[i].location[1]], {icon: greenIcon}).addTo(map.leaflet)
+            .bindPopup('<b>Neighborhood: </b>' + nCords[i][2] + '<br>' +'<b>Crimes: </b>' + nCords[i][4]);
+    }
 }
 </script>
 
