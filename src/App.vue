@@ -334,6 +334,10 @@ function handleClearMarkers(){
 
 // Function that updates the neighborhood markers depending on the amount of crimes commited
 function updateNeighborhoodMarkers(crimes){
+    nCords.forEach((neighborhood) => {
+        neighborhood[4] = 0;
+    })
+
     crimes.forEach((crime) => {
         nCords[crime.neighborhood_number - 1][4] = nCords[crime.neighborhood_number - 1][4] + 1;
 
