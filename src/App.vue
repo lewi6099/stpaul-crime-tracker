@@ -204,19 +204,165 @@ function submitCords(){
 }
 
 function updateCrimes(){
+    //Check all incident form inputs
+    let params = '';
+    //If Max Incidents are defined
+    const max_incidents = document.getElementById('max_incidents').value;
+    if (max_incidents !== '') {
+      params += 'limit=' + max_incidents;
+    }
+    //Default is 1000 incidents
+    else {
+      params += 'limit=1000';
+    }
+    //Check if any restrictions on neighborhoods
+    let no_selected_neighborhoods = true;
+    let selected_neighborhoods = [];
+    const neighborhood_checkbox_array = [];
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Conway').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_GreaterEastSide').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_WestSide').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_DaytonsBluff').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Payne').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_NorthEnd').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Thomas').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Summit').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_WestSeventh').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Como').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Hamline').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_SaintAnthonyPark').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_UnionPark').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Macalester').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Highland').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_SummitHill').checked);
+    neighborhood_checkbox_array.push(document.getElementById('neighborhood_Downtown').checked);
+    for(let i=0; i < neighborhood_checkbox_array.length; i++) {
+      if(neighborhood_checkbox_array[i] === true) {
+        no_selected_neighborhoods = false;
+        selected_neighborhoods.push(i+1);
+      }
+    }
+    //If no neighborhoods are selected, get neighborhood markers that are within view
     let newNeighborhoods = [];
-    nCords.forEach((neighborhood) => {
+    if(no_selected_neighborhoods === true) {
+      nCords.forEach((neighborhood) => {
         let lat = neighborhood[0];
         let lng = neighborhood[1];
-        if(checkViewBounds(lat, lng)){
-            newNeighborhoods.push(neighborhood[3]);
+        if (checkViewBounds(lat, lng)) {
+          newNeighborhoods.push(neighborhood[3]);
         }
-    })
-    let params = 'limit=1000&neighborhood=';
+      })
+    }
+    //Else select the ones that are checked
+    else {
+      nCords.forEach((neighborhood) => {
+        let num = neighborhood[3];
+        if (selected_neighborhoods.includes(num)) {
+          newNeighborhoods.push(neighborhood[3]);
+        }
+      })
+    }
     let resultString = newNeighborhoods.join(',');
-    params += resultString;
+    params += '&neighborhood=' + resultString;
+    //If Date Range is defined
+    const start_date = document.getElementById('start_date').value;
+    const end_date = document.getElementById('end_date').value;
+    if (start_date !== '' && end_date !== '') {
+        params += "&start_date=" + start_date + "&end_date=" + end_date;
+    }
+    //Crime Type Checkboxes
+    const incident_type_array = [];
+    let first_crime_type = true;
+    incident_type_array.push(document.getElementById('type_assault').checked);
+    incident_type_array.push(document.getElementById('type_theft').checked);
+    incident_type_array.push(document.getElementById('type_damage').checked);
+    incident_type_array.push(document.getElementById('type_narcotics').checked);
+    incident_type_array.push(document.getElementById('type_proactive').checked);
+    incident_type_array.push(document.getElementById('type_other').checked);
+    //Assault
+    if(incident_type_array[0] === true) {
+      if(first_crime_type === true) {
+        params += "&code=";
+        first_crime_type = false;
+      }
+      else {
+        params += ",";
+      }
+      for(let i=400; i <= 460; i++) {
+        params += i + ",";
+      }
+      for(let i=861; i < 870; i++) {
+        params += i + ",";
+      }
+      params += '870';
+    }
+    //Theft
+    if(incident_type_array[1] === true) {
+      if(first_crime_type === true) {
+        params += "&code=";
+        first_crime_type = false;
+      }
+      else {
+        params += ",";
+      }
+      for (let i = 0; i <= 400; i++) {
+        params += i + ",";
+      }
+      for (let i = 461; i <= 860; i++) {
+        params += i + ",";
+      }
+      params += '860';
+    }
+    //Criminal Damage
+    if(incident_type_array[2] === true) {
+      if(first_crime_type === true) {
+        params += "&code=";
+        first_crime_type = false;
+      }
+      else {
+        params += ",";
+      }
+      for(let i=1400; i < 1430; i++) {
+        params += i + ",";
+      }
+      params += '1430';
+    }
+    //Narcotics
+    if(incident_type_array[3] === true) {
+      if(first_crime_type === true) {
+        params += "&code=";
+        first_crime_type = false;
+      }
+      else {
+        params += ",";
+      }
+      for(let i=1800; i < 1885; i++) {
+        params += i + ",";
+      }
+      params += '1885';
+    }
+    //Proactive Police Visit
+    if(incident_type_array[4] === true) {
+      if(first_crime_type === true) {
+        params += "&code=9954";
+        first_crime_type = false;
+      }
+      else {
+        params += ",9954";
+      }
+    }
+    //Other
+    if(incident_type_array[5] === true) {
+      if(first_crime_type === true) {
+        params += "&code=2619,9959";
+        first_crime_type = false;
+      }
+      else {
+        params += ",2619,9959";
+      }
+    }
     getIncidents(params);
-}
+  }
 
 // Update cords based on panning in model
 function updateModelCords() {
@@ -328,21 +474,124 @@ function handleClearMarkers(){
         <br/>
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog>
-    <div class="grid-container ">
-        <div class="grid-x grid-padding-x">
-            <div id="leafletmap" class="cell auto"></div>
-        </div>
-        
+  <div class="grid-container">
+    <div class="grid-x grid-padding-x">
+        <div id="leafletmap" class="cell auto"></div>
+    </div>
+    <div class="grid-x grid-padding-x">
+      <button v-if="crimeMarkers.length>0" id="clear-markers" @click="handleClearMarkers">Clear Markers</button>
+    </div>
     <!--User cords or address input box-->
     <div class="user-input">
-        <label>Latitude: </label><input id="input-lat" class="space-right" type="text" v-model="locationLat">
-        <label>Longitude: </label><input id="input-lng" class="space-right" type="text" v-model="locationLng">
-        <label>Address: </label><input id="input-address" class="space-right" type="text" placeholder="Enter valid address">
-        <button id="submit-button" type="button" @click="submitCords">Go</button>
+        <label>Latitude: </label><input id="input-lat" type="text" v-model="locationLat">
+        <label>Longitude: </label><input id="input-lng" type="text" v-model="locationLng">
+        <label>Address: </label><input id="input-address" type="text" placeholder="Enter valid address">
+        <button id="submit-location" type="button" style="background: #099309" @click="submitCords">Go</button>
     </div>
-
-    <div v-if="crimeMarkers.length > 0">
-        <button id="clear-markers" @click="handleClearMarkers">Clear Markers</button>
+    <!--User filter parameters-->
+    <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+            <label>Incident Type:</label>
+        </div>
+        <!-- All crime check boxes -->
+        <div class="grid-x grid-padding-x">
+            <ul>
+                <li class="filter_list">
+                    <label>Assault: <input id="type_assault" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Theft: <input id="type_theft" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                  <label>Criminal Damage: <input id="type_damage" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Narcotics: <input id="type_narcotics" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                  <label>Proactive Police Visit: <input id="type_proactive" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Other: <input id="type_other" type="checkbox"></label>
+                </li>
+            </ul>
+        </div>
+        <div class="grid-x grid-padding-x">
+            <label>Neighborhood:</label>
+        </div>
+        <!-- All neighborhood check boxes -->
+        <div class="grid-x grid-padding-x">
+            <ul>
+                <li class="filter_list">
+                    <label>Conway/Battlecreek/Highwood: <input id="neighborhood_Conway" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Greater East Side: <input id="neighborhood_GreaterEastSide" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>West Side: <input id="neighborhood_WestSide" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Dayton's Bluff: <input id="neighborhood_DaytonsBluff" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Payne/Phalen: <input id="neighborhood_Payne" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>North End: <input id="neighborhood_NorthEnd" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Thomas/Dale(Frogtown): <input id="neighborhood_Thomas" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Summit/University: <input id="neighborhood_Summit" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>West Seventh/Fort Road: <input id="neighborhood_WestSeventh" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Como Park (Como): <input id="neighborhood_Como" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Hamline/Widway: <input id="neighborhood_Hamline" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Saint Anthony Park: <input id="neighborhood_SaintAnthonyPark" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Union Park: <input id="neighborhood_UnionPark" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Macalester/Groveland: <input id="neighborhood_Macalester" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Highland: <input id="neighborhood_Highland" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Summit Hill: <input id="neighborhood_SummitHill" type="checkbox"></label>
+                </li>
+                <li class="filter_list">
+                    <label>Downtown (Capitol River): <input id="neighborhood_Downtown" type="checkbox"></label>
+                </li>
+            </ul>
+        </div>
+        <!-- Calendar for selecting dates -->
+        <div class="grid-x grid-padding-x">
+          <label>Show crimes committed between dates:</label>
+        </div>
+        <div class="grid-x grid-padding-x">
+            <form action="/action_page.php">
+                <input class="filter_list" type="date" id="start_date">
+                <input class="filter_list" type="date" id="end_date">
+            </form>
+        </div>
+        <!-- Number of incidents input box -->
+        <div class="grid-x grid-padding-x">
+            <label>Max Incidents: </label><input id="max_incidents" type="text" placeholder="Enter max incidents">
+            <button id="submit-filters" type="button" style="background:#099309; margin:auto; width:50%" @click="updateCrimes">
+              Update Crime Filters
+            </button>
+        </div>
     </div>
 
     <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
@@ -355,7 +604,7 @@ function handleClearMarkers(){
         <p class="legend" style="background-color: floralwhite;"> Other </p>
     </div>
 
-    </div>
+  </div>
 
     <!-- Crime table -->
     <table v-if="crimes.length > 0">
@@ -376,7 +625,7 @@ function handleClearMarkers(){
             <!-- Assault -->
             <CrimeRow v-if="item.code >= 400 && item.code <= 460 || item.code >= 861 && item.code <= 870" @click="handleCrimeClick(item)" id='violent' :data="item" :api_url="crime_url"/>
             <!-- Property Crimes -->
-            <CrimeRow v-else-if="item.code <= 800 || item.code >= 1400 && item.code <= 1430" @click="handleCrimeClick(item)" id='property' :data="item" :api_url="crime_url"/>
+            <CrimeRow v-else-if="item.code <= 860 || item.code >= 1400 && item.code <= 1430" @click="handleCrimeClick(item)" id='property' :data="item" :api_url="crime_url"/>
             <!-- Narcotics -->
             <CrimeRow v-else-if="item.code >= 1800 && item.code <= 1885" @click="handleCrimeClick(item)" id='narcotics' :data="item" :api_url="crime_url"/>
             <!-- Other Crimes -->
@@ -387,13 +636,15 @@ function handleClearMarkers(){
 
 <style>
 #clear-markers {
-    background-color: rgb(251, 90, 90);
+    background:#ff3a3a;
     color: white;
     padding: 10px;
     font-size: 16px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin: 10px auto auto;
+    width:50%;
 }
 #violent{
   background-color: lightcoral;
@@ -430,44 +681,44 @@ function handleClearMarkers(){
     margin-top: 1rem;
     z-index: 1000;
 }
-
 #leafletmap {
     height: 500px;
 }
-
 .dialog-header {
     font-size: 1.2rem;
     font-weight: bold;
 }
-
 .dialog-label {
     font-size: 1rem;
 }
-
 .dialog-input {
     font-size: 1rem;
     width: 100%;
 }
-
 .dialog-error {
     font-size: 1rem;
     color: #D32323;
 }
 
-/* User data entry form*/
+/* User data entry form and crime filter*/
 #input-lat,
 #input-lng {
     width: 200px;
-    margin-right: 10px;
     margin:10px;
 }
-
 #input-address {
     width: 350px;
-    margin-right: 10px;
     margin:10px;
 }
-
+.filter_list {
+  display: inline-block;
+  margin-right: 50px;
+  user-select: none;
+}
+input[type="date"] {
+  width: 150px;
+  display: inline-block;
+}
 .user-input {
     display: flex;
     flex-direction: row;
@@ -475,8 +726,7 @@ function handleClearMarkers(){
     margin-bottom: 10px;
     margin-top: 10px;
 }
-
-#submit-button {
+#submit-location, #submit-filters {
     padding: 8px 15px;
     border-radius: 5px;
     background-color: blue;

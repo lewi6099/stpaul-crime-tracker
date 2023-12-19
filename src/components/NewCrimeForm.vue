@@ -74,10 +74,12 @@
 
 <template>
     <div v-if="!showForm">
-        <button id="showButton" type="button" @click="toggleForm">Add a new crime</button>
+        <button id="showButton" type="button" @click="toggleForm" style="background-color: #ff3a3a">Add a new crime</button>
     </div>
     <div v-if="showForm">
-        <button id="hideButton" type="button" @click="toggleForm">Hide new crime form</button>
+        <button id="hideButton" type="button" @click="toggleForm" style="color: white; background-color: #ff3a3a">
+          Hide new crime form
+        </button>
     </div>
     <div v-if="showForm">
         <label>Case Number: </label><input type="text" v-model="case_number">
