@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import CrimeRow from './components/CrimeRow.vue';
 import NewCrimeForm from './components/NewCrimeForm.vue';
+import NavBar from './components/NavBar.vue';
 
 // Initialize crime URL
 let crime_url = ref('');
@@ -14,6 +15,8 @@ let crimeMarkers = reactive([]);
 // Initialize codes and crimes
 let neighborhoods;
 let crimes = reactive([]);
+let neighborhoodUI = ref();
+let showUI = ref(false);
 const nCords = [
     [44.942068, -93.020521, 'Conway / Battlecreek / Highwood', 1, 0],
     [44.977413, -93.025156, 'Greater East Side', 2, 0],
@@ -116,6 +119,7 @@ function initializeCrimes() {
     })
     .then(() => {
         getIncidents('limit=1000');
+        neighborhoodUI.value = false;
     })
     .catch((error) => {
         console.log(error);
@@ -203,6 +207,7 @@ function updateCrimes(){
     }
     //Check if any restrictions on neighborhoods
     let no_selected_neighborhoods = true;
+    neighborhoodUI.value = false;
     let selected_neighborhoods = [];
     const neighborhood_checkbox_array = [];
     neighborhood_checkbox_array.push(document.getElementById('neighborhood_Conway').checked);
@@ -225,6 +230,7 @@ function updateCrimes(){
     for(let i=0; i < neighborhood_checkbox_array.length; i++) {
       if(neighborhood_checkbox_array[i] === true) {
         no_selected_neighborhoods = false;
+        neighborhoodUI.value = true;
         selected_neighborhoods.push(i+1);
       }
     }
@@ -515,7 +521,8 @@ function updateNeighborhoodMarkers(crimes){
         <br/>
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog>
-  <div class="grid-container">
+    <NavBar></NavBar>
+  <div style="padding-top: 20px" class="grid-container">
     <div class="grid-x grid-padding-x">
         <div id="leafletmap" class="cell auto"></div>
     </div>
@@ -530,9 +537,13 @@ function updateNeighborhoodMarkers(crimes){
         <button id="submit-location" type="button" style="background: #099309" @click="submitCords">Go</button>
     </div>
     <!--User filter parameters-->
-    <div class="grid-container">
+    <div style="padding-bottom: 10px;">
+        <button v-if="showUI" id="UIbutton" type="button" @click="showUI=!showUI">Hide UI</button>
+        <button v-if="!showUI" id="UIbutton" type="button" @click="showUI=!showUI">Show UI</button>
+    </div>
+    <div v-if="showUI" class="grid-container">
         <div class="grid-x grid-padding-x">
-            <label>Incident Type:</label>
+            <label style="font-weight: bold;">Incident Type:</label>
         </div>
         <!-- All crime check boxes -->
         <div class="grid-x grid-padding-x">
@@ -558,7 +569,7 @@ function updateNeighborhoodMarkers(crimes){
             </ul>
         </div>
         <div class="grid-x grid-padding-x">
-            <label>Neighborhood:</label>
+            <label style="font-weight: bold;">Neighborhood:</label>
         </div>
         <!-- All neighborhood check boxes -->
         <div class="grid-x grid-padding-x">
@@ -618,7 +629,7 @@ function updateNeighborhoodMarkers(crimes){
         </div>
         <!-- Calendar for selecting dates -->
         <div class="grid-x grid-padding-x">
-          <label>Show crimes committed between dates:</label>
+          <label style="font-weight: bold;">Show crimes committed between dates:</label>
         </div>
         <div class="grid-x grid-padding-x">
             <form action="/action_page.php">
@@ -628,11 +639,17 @@ function updateNeighborhoodMarkers(crimes){
         </div>
         <!-- Number of incidents input box -->
         <div class="grid-x grid-padding-x">
-            <label>Max Incidents: </label><input id="max_incidents" type="text" placeholder="Enter max incidents">
+            <label style="font-weight: bold;">Max Incidents: </label>
+        </div>
+        <div class="grid-x grid-padding-x">
+            <input id="max_incidents" type="text" placeholder="Enter max incidents">
+        </div>
+        <div class="grid-x grid-padding-x">
             <button id="submit-filters" type="button" style="background:#099309; margin:auto; width:50%" @click="updateCrimes">
-              Update Crime Filters
+                Update Crime Filters
             </button>
         </div>
+        
     </div>
 
     <NewCrimeForm v-if="valid_url" :api_url="crime_url"></NewCrimeForm>
@@ -644,9 +661,12 @@ function updateNeighborhoodMarkers(crimes){
         <p class="legend" style="background-color: #C4A484;"> Narcotic </p>
         <p class="legend" style="background-color: floralwhite;"> Other </p>
     </div>
-
+    
   </div>
-
+    <div>
+        <p v-if="neighborhoodUI" style="float: right; padding: 10px;">*Showing neighborhoods from UI controls</p>
+        <p v-if="neighborhoodUI === false" style="float: right; padding: 10px;">*Showing neighborhoods displayed on map</p>
+    </div>
     <!-- Crime table -->
     <table v-if="crimes.length > 0">
         <thead>
@@ -655,7 +675,7 @@ function updateNeighborhoodMarkers(crimes){
                 <th>Code</th>
                 <th>Incident</th>
                 <th>Police Grid</th>
-                <th>Neighborhood Name</th>
+                <th>Neighborhood Name*</th>
                 <th>Block</th>
                 <th>Date</th>
                 <th>Time</th>
@@ -676,6 +696,18 @@ function updateNeighborhoodMarkers(crimes){
 </template>
 
 <style>
+#max_incidents {
+    width: 200px;
+}
+#UIbutton {
+        background-color: #ff3a3a;
+        color: white;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+}
 #clear-markers {
     background:#ff3a3a;
     color: white;
