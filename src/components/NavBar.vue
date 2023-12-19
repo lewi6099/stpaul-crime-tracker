@@ -7,7 +7,7 @@
         <div class="container">
             <div class="navbar-content">
                 <a href="" class="navbar-link">St. Paul Crime Map</a>
-                <a href="page2.html" class="navbar-link">About The Project</a>          
+                <a href="about.html" class="navbar-link">About The Project</a>          
             </div>
         </div>
     </div>
