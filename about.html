@@ -23,24 +23,43 @@
     <h2><b>About the Team</b></h2>
     <h3><b>Ethan</b></h3>
     <h3><b>Jack</b></h3>
+    <div class="grid-x">
+        <div class="small-12 large-3 cell"><img src="public/img/jack_headshot.jpg" alt="Niccolo Guidarelli"></div>
+        <div class="small-12 large-9 cell">
+            <p>Jack is currently a Junior at the University of St. Thomas in St. Paul, Minnesota. He is studying Computer Science with a minor in Data Analytics and Business Administration.</p>
+        </div>
+    </div>
     <h3><b>Niccolo Guidarelli</b></h3>
     <div class="grid-x">
         <div class="small-12 large-2 cell"><img src="IMG_0070.jpg" alt="Niccolo Guidarelli"></div>
-        <div class="small-12 large-10 cell"><p>
-            <br>Niccolo Guidarelli has a major in computer science and a minor in business.
-        </p></div>
+        <div class="small-12 large-10 cell">
+            <p>Niccolo Guidarelli has a major in computer science and a minor in business.</p>
+        </div>
     </div>
     <h2><b>Tools Used</b></h2>
-    Leaflet API was used to show the map of the St. Paul area.
-    The Nominatim API was used to allow users to input an adress or a latitude and longitude
-    to move the map to the location if the location is in St. Paul.
-    A newly created API retreves the crime data for the most recent St. Paul crimes.
+    <ul>
+        <li><b>Leaflet API</b> was used to show the map of the St. Paul area</li>
+        <li><b>Nominatim API</b> was used to allow users to input an adress or a latitude and longitude to move the map to the location if the location is in St. Paul</li>
+        <li>A newly custom created <b>St. Paul Crime API</b> retreves the crime data for the most recent crimes</li>
+        <li>The <b>Vue.js</b> framework was used to help build the app and make it reactive</li>
+        <li>The <b>Foundation CSS</b> framework was used to help style the app, including this page</li>
+        <li>The IDEs <b>Visual Studio Code</b> and <b>IntelliJ IDEA</b> was used to edit code</li>
+        <li><b>Node.js</b> is used to host the St. Paul crime API</li>
+    </ul>
+    
     <h2><b>Video Demo</b></h2>
     <h2><b>Interesting findings</b></h2>
+    <ul>
+        <li>Vue.js is very easy to use once you learn the basics and start using it</li>
+    </ul>
     <a href="index.html">Access the project here</a>
 </body>
 </html>
 <style>
+    img {
+        width: 200px;
+        height: auto;
+    }
     .navbar-link {
         padding: 10px 20px;
         background-color: #555;
@@ -72,5 +91,6 @@
 
     .navbar-link:hover {
         background-color: #777;
+        color: white;
     }
 </style>
