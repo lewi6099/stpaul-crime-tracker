@@ -128,22 +128,6 @@ function initializeCrimes() {
     .catch((error) => {
         console.log(error);
     })
-    /*
-    fetch(crime_url.value + '/neighborhoods')
-    .then((response) => {
-        return response.json();
-    })
-    .then((newReponse) => {
-        neighborhoods = newReponse;
-    })
-    .then(() => {
-        getIncidents('limit=1000');
-        neighborhoodUI.value = false;
-    })
-    .catch((error) => {
-        console.log(error);
-    })
-    */
 }
 
 // Function called when user presses 'OK' on dialog box
