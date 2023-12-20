@@ -14,6 +14,7 @@ let crimeMarkers = reactive([]);
 
 // Initialize codes and crimes
 let neighborhoods;
+let incidentType;
 let crimes = reactive([]);
 let neighborhoodUI = ref();
 let showUI = ref(false);
@@ -110,16 +111,19 @@ onMounted(() => {
 // FUNCTIONS
 // Function called once user has entered REST API URL
 function initializeCrimes() {
-    fetch(crime_url.value + '/neighborhoods')
+    let p1 = fetch(crime_url.value + '/neighborhoods');
+    let p2 = fetch(crime_url.value + '/codes');
+    Promise.all([p1, p2])
     .then((response) => {
-        return response.json();
-    })
-    .then((newReponse) => {
-        neighborhoods = newReponse;
-    })
-    .then(() => {
-        getIncidents('limit=1000');
-        neighborhoodUI.value = false;
+        Promise.all([response[0].json(), response[1].json()])
+        .then((newResponse) => {
+        neighborhoods = newResponse[0];
+        incidentType = newResponse[1];
+        })
+        .then(() => {
+            getIncidents('limit=1000');
+            neighborhoodUI.value = false;
+        })
     })
     .catch((error) => {
         console.log(error);
@@ -391,9 +395,11 @@ function getIncidents(params) {
         crimes.splice(0, crimes.length);
         newResponse.forEach((index) => {
             let neighborhood_name = neighborhoods.find(neighborhood => neighborhood.id === index.neighborhood_number);
+            let incident_type = incidentType.find(code => code.code === index.code);
             crimes.push({
                 case_number: index.case_number,
                 code: index.code,
+                incident_type: incident_type.type,
                 incident: index.incident,
                 police_grid: index.police_grid,
                 neighborhood_name: neighborhood_name.name,
@@ -672,12 +678,12 @@ function updateNeighborhoodMarkers(crimes){
         <thead>
             <tr>
                 <th>Case Number</th>
-                <th>Code</th>
+                <th>Incident Type (Code)</th>
                 <th>Incident</th>
                 <th>Police Grid</th>
                 <th>Neighborhood Name*</th>
                 <th>Block</th>
-                <th>Date</th>
+                <th style="min-width: 101px">Date</th>
                 <th>Time</th>
                 <th></th>
             </tr>
