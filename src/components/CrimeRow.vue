@@ -37,7 +37,7 @@
 <template>
         <tr v-if="showRow">
             <td>{{ data.case_number }}</td>
-            <td>{{ data.code }}</td>
+            <td>{{ data.incident_type }} ({{data.code}})</td>
             <td>{{ data.incident }}</td>
             <td>{{ data.police_grid }}</td>
             <td>{{ data.neighborhood_name }}</td>
