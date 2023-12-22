@@ -1,10 +1,58 @@
-* {
+img {
+    color: white; /*This makes the alt text white*/
+    border-radius: 10px;
+    border: 4px solid #C4A484;
+    margin-top: 20px;
+}
+body {
+    background: #1E792C;
+    margin: 0;
+    padding: 0;
+}
+p, ul {
+    border-radius: 25px;
+    border: 4px solid #d44c4c;
+    background: white;
+    padding: 15px;
+    margin: 30px;
+}
+li {
+    margin-left: 30px;
+}
+h1, h2 {
+    text-decoration: 4px underline white;
+    color: white;
+    margin-top: 20px;
+}
+.name {
+    font-size: 35px;
+    font-weight: bold;
+    color: white;
+    text-underline: #ff5151;
+}
+.navbar-link {
+    padding: 10px 20px;
+    background-color: #555;
+    color: white;
+    text-decoration: none; /* Remove the underline from links */
+    border-radius: 5px;
+    cursor: pointer;
+}
+.navbar {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+}
+.container {
+    width: 80%;
     margin: 0 auto;
 }
+.navbar-content {
+    display: flex;
+    justify-content: space-around;
+}
 
-html {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 100%;
-    width: 100%;
-    height: 100%;
+.navbar-link:hover {
+    background-color: #777;
+    color: white;
 }

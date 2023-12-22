@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>About the project</title>
     <!-- Foundation CSS -->
-    <link rel="stylesheet" href="css/foundation.css">
+    <link rel="stylesheet" href="public/css/foundation.css">
+    <!-- Additional CSS File -->
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
     <!--Header-->
@@ -13,31 +15,69 @@
         <div class="container">
             <div class="navbar-content">
                 <a href="/" class="navbar-link">St. Paul Crime Map</a>
-                <a href="about.html" class="navbar-link">About The Project</a>          
+                <a href="about.html" class="navbar-link">About The Project</a>
             </div>
         </div>
     </div>
 
-    <!--About Page-->
-    <h1><b>About the Project</b></h1>
-    <h2><b>About the Team</b></h2>
-    <h3><b>Ethan</b></h3>
-    <h3><b>Jack</b></h3>
-    <div class="grid-x">
-        <div class="small-12 large-3 cell"><img src="public/img/jack_headshot.jpg" alt="Niccolo Guidarelli"></div>
-        <div class="small-12 large-9 cell">
-            <p>Jack is currently a Junior at the University of St. Thomas in St. Paul, Minnesota. He is studying Computer Science with a minor in Data Analytics and Business Administration.</p>
+    <!-- Title -->
+    <div class="grid-container">
+        <div class="grid-x">
+            <div class="cell text-center small-3">
+                <img style="height: auto;width: 200px;" src="public/img/ChristmasTree.png" alt="Image of Christmas Tree">
+            </div>
+            <div class="cell text-center small-6">
+                <h1 style="font-size: 55px;margin-left: 50px; margin-right: 50px; padding: 60px 0;"><b>About the Project</b></h1>
+            </div>
+            <div class="cell text-center small-3">
+                <img style="height: auto;width: 200px;" src="public/img/ChristmasTree.png" alt="Image of Christmas Tree">
+            </div>
         </div>
     </div>
-    <h3><b>Niccolo Guidarelli</b></h3>
-    <div class="grid-x">
-        <div class="small-12 large-2 cell"><img src="IMG_0070.jpg" alt="Niccolo Guidarelli"></div>
-        <div class="small-12 large-10 cell">
-            <p>Niccolo Guidarelli has a major in computer science and a minor in business.</p>
+
+    <!-- About the Team -->
+    <div class="text-center">
+        <h2 style="font-size: 45px; margin-top: 0px"><b>The Team</b></h2>
+    </div>
+    <div class="grid-container">
+        <div class="grid-x">
+            <div class="cell text-center small-4">
+                <h2 class="name">Ethan Johnson</h2>
+                <img style="height: 400px;width: auto;" src="public/img/EthanHeadshot.png" alt="Headshot of Ethan Johnson">
+            </div>
+            <div class="cell text-center small-4">
+                <h2 class="name">Jack Lewis</h2>
+                <img style="height: 400px;width: auto;" src="public/img/jack_headshot.jpg" alt="Headshot of Jack Lewis">
+            </div>
+            <div class="cell text-center small-4">
+                <h2 class="name">Niccolo Guidarelli</h2>
+                <img style="height: 400px;width: auto;" src="IMG_0070.jpg" alt="Headshot of Niccolo Guidarelli">
+            </div>
+        </div>
+        <div class="grid-x">
+            <div class="cell text-center small-4">
+                <p>
+                    Ethan, a junior at St. Thomas, is double majoring in Computer Science and Business Administration with
+                    minors in Business Analytics and Applied Statistics.
+                </p>
+            </div>
+            <div class="cell text-center small-4">
+                <p>
+                    Jack is currently a Junior at the University of St. Thomas in St. Paul, Minnesota. He is studying Computer
+                    Science with a minor in Data Analytics and Business Administration.
+                </p>
+            </div>
+            <div class="cell text-center small-4">
+                <p>
+                    Niccolo Guidarelli has a major in computer science and a minor in business.
+                </p>
+            </div>
         </div>
     </div>
-    <h2><b>Tools Used</b></h2>
-    <ul>
+
+    <!--Tools Used-->
+    <h2 class="text-center"><b>Tools Used</b></h2>
+    <ul style="width: 80%; margin: auto">
         <li><b>Leaflet API</b> was used to show the map of the St. Paul area</li>
         <li><b>Nominatim API</b> was used to allow users to input an adress or a latitude and longitude to move the map to the location if the location is in St. Paul</li>
         <li>A newly custom created <b>St. Paul Crime API</b> retreves the crime data for the most recent crimes</li>
@@ -46,51 +86,19 @@
         <li>The IDEs <b>Visual Studio Code</b> and <b>IntelliJ IDEA</b> was used to edit code</li>
         <li><b>Node.js</b> is used to host the St. Paul crime API</li>
     </ul>
-    
-    <h2><b>Video Demo</b></h2>
-    <h2><b>Interesting findings</b></h2>
-    <ul>
-        <li>Vue.js is very easy to use once you learn the basics and start using it</li>
+
+    <!--Interesting Findings-->
+    <h2 class="text-center"><b>Interesting findings</b></h2>
+    <ul style="width: 65%; margin: auto">
+        <li>Vue.js was confusing at first, but is very easy to use once you learn the basics and start getting comfortable it</li>
+        <li>V-If and V-For statements are incredibly useful</li>
+        <li>There are many more proactive police visits in the St. Paul area than we realized</li>
+        <li>Downtown is the smallest "neighborhood" by area, but had the highest number of incidents in nearly every category</li>
+        <li>The area around St. Thomas had very low rates of assault compared to the other neighborhoods on the map</li>
+        <li>The most common incidents around St. Thomas were Community Engagement Events and Discharging a Firearm within City Limits</li>
     </ul>
-    <a href="index.html">Access the project here</a>
+
+    <!--Video Demo-->
+    <h2 class="text-center"><b>Video Demo</b></h2>
 </body>
 </html>
-<style>
-    img {
-        width: 200px;
-        height: auto;
-    }
-    .navbar-link {
-        padding: 10px 20px;
-        background-color: #555;
-        color: white;
-        text-decoration: none; /* Remove the underline from links */
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    .navbar {
-        background-color: #333;
-        color: white;
-        padding: 10px 0;
-    }
-
-    .container {
-        width: 80%;
-        margin: 0 auto;
-    }
-
-    .navbar-content {
-        display: flex;
-        justify-content: space-around;
-    }
-
-    .navbar-link:hover {
-        background-color: #777;
-        color: white;
-    }
-</style>
